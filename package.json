@@ -1,7 +1,8 @@
 {
-  "name": "asked-store-monorepo",
+  "name": "asked-store",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.6.0",
+  "description": "ASKED Store — Telegram Mini App (webapp + backend + shared).",
   "workspaces": [
     "webapp",
     "backend",
