@@ -1,0 +1,30 @@
+{
+  "name": "asked-store-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "webapp",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "npm-run-all -p dev:webapp dev:backend",
+    "dev:webapp": "npm --workspace webapp run dev",
+    "dev:backend": "npm --workspace backend run dev",
+    "build": "npm-run-all build:webapp build:backend",
+    "build:webapp": "npm --workspace webapp run build",
+    "build:backend": "npm --workspace backend run build",
+    "lint": "npm-run-all lint:webapp lint:backend --continue-on-error",
+    "lint:webapp": "npm --workspace webapp run lint --if-present",
+    "lint:backend": "npm --workspace backend run lint --if-present",
+    "test": "echo \"(TODO: добавить тесты)\"",
+    "version:major": "node scripts/bump-version.cjs major",
+    "version:minor": "node scripts/bump-version.cjs minor",
+    "version:patch": "node scripts/bump-version.cjs patch"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
+
+

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+
+.env
+.env.*
+
+.DS_Store
+
+# GPT / временные фиксы
+fixes/
+
+

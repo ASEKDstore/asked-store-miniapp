@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "baseUrl": "./src",
+    "paths": {
+      "@components/": ["components/"],
+      "@screens/": ["screens/"],
+      "@layout/": ["layout/"],
+      "@auth/": ["auth/"],
+      "@context/": ["context/"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}
+
+
