@@ -1,53 +1,45 @@
 import React from "react";
-import { TelegramUser } from "@auth/useTelegram";
+import { useTelegram } from "@auth/useTelegram";
+import { LogoMark } from "@components/LogoMark";
 
 type Props = {
   onMenuClick: () => void;
-  user: TelegramUser | null;
+  user: any;
 };
 
-const Header: React.FC<Props> = ({ onMenuClick, user }) => {
+const Header: React.FC<Props> = ({ onMenuClick, user: userProp }) => {
+  const { user } = useTelegram();
+  const currentUser = user || userProp;
+
   return (
-    <header className="flex items-center justify-between px-4 pt-3 pb-2">
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-          ASKED
-        </span>
-        <span className="text-lg font-semibold">Store</span>
+    <header className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/10 bg-black/60 backdrop-blur-xl">
+      <div className="flex items-center gap-3 min-w-0">
+        <LogoMark compact={false} />
+
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-semibold truncate">
+            {currentUser?.first_name ?? "Гость"}
+          </span>
+          {currentUser?.username && (
+            <span className="text-[11px] text-white/45 truncate">
+              @{currentUser.username}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {user && (
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-askedAccent to-askedAccentSoft flex items-center justify-center text-[10px] font-semibold">
-              {user.first_name?.[0] || ""}
-              {user.last_name?.[0] || ""}
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="font-medium">
-                {user.first_name || ""}
-                {user.last_name ? ` ${user.last_name}` : ""}
-              </span>
-              {user.username && (
-                <span className="text-[10px] text-slate-500">
-                  @{user.username}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="asked-card asked-tap w-9 h-9 flex items-center justify-center border-slate-700/60"
-        >
-          <div className="space-y-[3px]">
-            <span className="block w-4 h-[1px] bg-slate-200" />
-            <span className="block w-3 h-[1px] bg-slate-400" />
-            <span className="block w-2 h-[1px] bg-slate-500" />
-          </div>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onMenuClick}
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/6 hover:bg-white/10 border border-white/10 transition-colors active:scale-95"
+      >
+        <span className="sr-only">Открыть меню</span>
+        <div className="space-y-1.5">
+          <span className="block w-4 h-[2px] rounded-full bg-white/85" />
+          <span className="block w-4 h-[2px] rounded-full bg-white/60" />
+          <span className="block w-4 h-[2px] rounded-full bg-white/85" />
+        </div>
+      </button>
     </header>
   );
 };
