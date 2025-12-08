@@ -12,32 +12,50 @@ const Header: React.FC<Props> = ({ onMenuClick, user: userProp }) => {
   const currentUser = user || userProp;
 
   return (
-    <header className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/10 bg-black/60 backdrop-blur-xl">
+    <header
+      className="
+        w-full
+        fixed top-0 left-0 z-50
+        flex items-center justify-between
+        px-4
+        h-[56px]
+        bg-[rgba(0,0,0,0.55)]
+        backdrop-blur-xl
+        border-b border-white/10
+      "
+    >
+      {/* левая часть – лого + имя */}
       <div className="flex items-center gap-3 min-w-0">
-        <LogoMark compact={false} />
+        <LogoMark />
 
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-semibold truncate">
+          <span className="text-sm font-semibold truncate">
             {currentUser?.first_name ?? "Гость"}
           </span>
           {currentUser?.username && (
-            <span className="text-[11px] text-white/45 truncate">
+            <span className="text-[11px] text-white/50 truncate">
               @{currentUser.username}
             </span>
           )}
         </div>
       </div>
 
+      {/* правая часть – бургер */}
       <button
         type="button"
         onClick={onMenuClick}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/6 hover:bg-white/10 border border-white/10 transition-colors active:scale-95"
+        className="
+          flex items-center justify-center
+          w-10 h-10
+          rounded-full
+          bg-white/10 border border-white/10
+          hover:bg-white/20 transition active:scale-95
+        "
       >
-        <span className="sr-only">Открыть меню</span>
-        <div className="space-y-1.5">
-          <span className="block w-4 h-[2px] rounded-full bg-white/85" />
-          <span className="block w-4 h-[2px] rounded-full bg-white/60" />
-          <span className="block w-4 h-[2px] rounded-full bg-white/85" />
+        <div className="space-y-1">
+          <span className="block w-5 h-[2px] bg-white rounded-full"></span>
+          <span className="block w-5 h-[2px] bg-white/70 rounded-full"></span>
+          <span className="block w-5 h-[2px] bg-white rounded-full"></span>
         </div>
       </button>
     </header>

@@ -38,9 +38,9 @@ const RootLayout: React.FC = () => {
       {/* Синхронизация телеграм-кнопки "Назад" с роутером */}
       <TelegramBackSync />
 
-      <header className="app-header">
-        <Header onMenuClick={() => setMenuOpen(true)} user={user} />
-      </header>
+      <Header onMenuClick={() => setMenuOpen(true)} user={user} />
+
+      <div className="pt-[56px]"></div>
 
       <main className="app-main">
         <div key={location.pathname} className="screen-fade-in">
