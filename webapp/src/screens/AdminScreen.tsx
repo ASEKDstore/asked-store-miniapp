@@ -177,10 +177,7 @@ const AdminScreen: React.FC = () => {
     setAuthError(null);
     try {
       const res = await fetch(`${API_BASE}/admin/home`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeader
-        }
+        headers: authHeader
       });
       const data = await res.json();
       if (!data.ok) {
@@ -405,10 +402,7 @@ const AdminScreen: React.FC = () => {
     try {
       const res = await fetch(`${API_BASE}/admin/home`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeader
-        },
+        headers: authHeader,
         body: JSON.stringify(home)
       });
       const data = await res.json();

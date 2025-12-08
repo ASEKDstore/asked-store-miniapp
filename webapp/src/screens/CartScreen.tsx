@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "@context/CartContext";
+import { useCart, CartItem } from "@context/CartContext";
 
 const CartScreen: React.FC = () => {
   const { items, totalPrice, removeFromCart, clearCart } = useCart();
@@ -44,7 +44,7 @@ const CartScreen: React.FC = () => {
           </button>
         </div>
         <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto no-scrollbar">
-          {items.map((item) => (
+          {items.map((item: CartItem) => (
             <div
               key={item.id}
               className="flex items-center justify-between text-xs py-1.5 border-b border-slate-800/60 last:border-b-0"

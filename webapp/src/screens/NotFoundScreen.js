@@ -1,0 +1,7 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useNavigate } from "react-router-dom";
+const NotFoundScreen = () => {
+    const navigate = useNavigate();
+    return (_jsx("div", { className: "min-h-[60vh] flex items-center justify-center", children: _jsxs("div", { className: "asked-card px-5 py-4 flex flex-col gap-3 text-sm max-w-xs w-full screen-card-pop", children: [_jsx("div", { className: "text-[11px] uppercase tracking-[0.18em] text-slate-500", children: "error 404" }), _jsx("div", { className: "text-base font-semibold", children: "\u041F\u043E\u0445\u043E\u0436\u0435, \u0421\u0438\u043D\u0438\u0439 \u043F\u043E\u0442\u0435\u0440\u044F\u043B \u044D\u0442\u043E\u0442 \u044D\u043A\u0440\u0430\u043D" }), _jsx("p", { className: "text-[11px] text-slate-400", children: "\u0422\u0430\u043A\u043E\u0439 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0442, \u043B\u0438\u0431\u043E \u043E\u043D\u0430 \u0435\u0449\u0451 \u0432 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0435. \u0412\u0435\u0440\u043D\u0451\u043C\u0441\u044F \u043D\u0430 \u0433\u043B\u0430\u0432\u043D\u0443\u044E \u0432\u0438\u0442\u0440\u0438\u043D\u0443 ASKED?" }), _jsx("button", { onClick: () => navigate("/"), className: "mt-1 asked-tap self-start px-3 py-1.5 text-[11px] rounded-xl bg-askedAccentSoft font-semibold", children: "\u041D\u0430 \u0433\u043B\u0430\u0432\u043D\u0443\u044E" })] }) }));
+};
+export default NotFoundScreen;

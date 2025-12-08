@@ -1,17 +1,25 @@
 {
-  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vite/client"],
-    "baseUrl": "./src",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": "src",
     "paths": {
-      "@components/": ["components/"],
-      "@screens/": ["screens/"],
-      "@layout/": ["layout/"],
-      "@auth/": ["auth/"],
-      "@context/": ["context/"]
-    }
+      "@auth/*": ["auth/*"],
+      "@layout/*": ["layout/*"],
+      "@screens/*": ["screens/*"],
+      "@context/*": ["context/*"],
+      "@components/*": ["components/*"],
+      "@utils/*": ["utils/*"]
+    },
+    "types": ["vite/client"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src"]
 }
 
 

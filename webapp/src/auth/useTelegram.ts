@@ -1,11 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 
-declare global {
-  interface Window {
-    Telegram?: any;
-  }
-}
-
 export type TelegramUser = {
   id: number;
   username?: string;
@@ -56,7 +50,9 @@ export function useTelegram(): TelegramContext {
 
     try {
       tg.ready();
-      tg.expand();
+      if (tg.expand) {
+        tg.expand();
+      }
 
       // Тема
       if (tg.themeParams) {
@@ -77,8 +73,12 @@ export function useTelegram(): TelegramContext {
 
       // Цвет хедера под dark-тему
       try {
-        tg.setHeaderColor("#000000");
-        tg.setBackgroundColor("#000000");
+        if (tg.setHeaderColor) {
+          tg.setHeaderColor("#000000");
+        }
+        if (tg.setBackgroundColor) {
+          tg.setBackgroundColor("#000000");
+        }
       } catch {
         // ignore
       }
@@ -99,7 +99,9 @@ export function useTelegram(): TelegramContext {
       expand: () => {
         const tg = window.Telegram?.WebApp;
         try {
-          tg?.expand();
+          if (tg?.expand) {
+            tg.expand();
+          }
         } catch {
           /* ignore */
         }
@@ -107,7 +109,9 @@ export function useTelegram(): TelegramContext {
       close: () => {
         const tg = window.Telegram?.WebApp;
         try {
-          tg?.close();
+          if (tg?.close) {
+            tg.close();
+          }
         } catch {
           /* ignore */
         }

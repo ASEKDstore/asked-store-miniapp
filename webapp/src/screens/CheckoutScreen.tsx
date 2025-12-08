@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "@context/CartContext";
+import { useCart, CartItem } from "@context/CartContext";
 import { useTelegram } from "@auth/useTelegram";
 
 const API_BASE =
@@ -60,7 +60,7 @@ const CheckoutScreen: React.FC = () => {
         address: address.trim(),
         deliveryMethod,
         comment: comment.trim() || undefined,
-        items: items.map((it) => ({
+        items: items.map((it: CartItem) => ({
           id: it.id,
           name: it.name,
           price: it.price,
