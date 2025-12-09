@@ -372,7 +372,7 @@ const AdminScreen: React.FC = () => {
   const fetchBanners = async () => {
     setLoadingBanners(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/banners`, {
+      const res = await fetch(`${API_BASE}/api/admin/banners`, {
         headers: authHeader
       });
       const data = await res.json();
@@ -395,7 +395,7 @@ const AdminScreen: React.FC = () => {
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/admin/banners`, {
+      const res = await fetch(`${API_BASE}/api/admin/banners`, {
         method: "POST",
         headers: authHeader,
         body: JSON.stringify(newBanner)
@@ -425,7 +425,7 @@ const AdminScreen: React.FC = () => {
 
   const handleUpdateBanner = async (id: string, patch: Partial<Banner>) => {
     try {
-      const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
         method: "PATCH",
         headers: authHeader,
         body: JSON.stringify(patch)
@@ -445,7 +445,7 @@ const AdminScreen: React.FC = () => {
   const handleDeleteBanner = async (id: string) => {
     if (!confirm("Удалить баннер?")) return;
     try {
-      const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
         method: "DELETE",
         headers: authHeader
       });

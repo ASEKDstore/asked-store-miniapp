@@ -265,7 +265,7 @@ const AdminScreen = () => {
     const fetchBanners = async () => {
         setLoadingBanners(true);
         try {
-            const res = await fetch(`${API_BASE}/admin/banners`, {
+            const res = await fetch(`${API_BASE}/api/admin/banners`, {
                 headers: authHeader
             });
             const data = await res.json();
@@ -290,7 +290,7 @@ const AdminScreen = () => {
             return;
         }
         try {
-            const res = await fetch(`${API_BASE}/admin/banners`, {
+            const res = await fetch(`${API_BASE}/api/admin/banners`, {
                 method: "POST",
                 headers: authHeader,
                 body: JSON.stringify(newBanner)
@@ -321,7 +321,7 @@ const AdminScreen = () => {
     };
     const handleUpdateBanner = async (id, patch) => {
         try {
-            const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+            const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
                 method: "PATCH",
                 headers: authHeader,
                 body: JSON.stringify(patch)
@@ -343,7 +343,7 @@ const AdminScreen = () => {
         if (!confirm("Удалить баннер?"))
             return;
         try {
-            const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+            const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
                 method: "DELETE",
                 headers: authHeader
             });

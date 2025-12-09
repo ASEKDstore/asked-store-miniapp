@@ -145,7 +145,7 @@ const HomeScreen: React.FC = () => {
     const fetchBanners = async () => {
       setLoadingBanners(true);
       try {
-        const res = await fetch(`${API_BASE}/banners`);
+        const res = await fetch(`${API_BASE}/api/banners`);
         const data = await res.json();
         if (data?.ok && Array.isArray(data.banners)) {
           setPromoBanners(data.banners.slice(0, 7)); // максимум 7 баннеров
@@ -162,25 +162,30 @@ const HomeScreen: React.FC = () => {
   const hasOrder = lastOrder && lastOrder.ok;
   const hasHome = homeData && homeData.ok;
 
-  const banners = hasHome ? homeData!.banners : [];
   const topProducts = hasHome ? homeData!.topProducts : [];
   const promos = hasHome ? homeData!.promos : [];
   const gallery = hasHome ? homeData!.gallery : [];
   const socials = hasHome ? homeData!.socials : [];
 
+  // Используем только новые промо-баннеры
+  const banners = promoBanners;
+
   return (
-    <div className="space-y-4 pb-16">
+    <div className="space-y-4 pb-16 px-4">
       {/* Промо-баннеры (новые) */}
-      {promoBanners.length > 0 && (
-        <section className="px-4">
-          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-1 -mx-4 px-4">
-            {promoBanners.map((b) => (
-              <div key={b.id} className="min-w-[90%] snap-center">
+      {banners.length > 0 && (
+        <div className="mb-6 mt-2">
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-1 pb-2 scroll-smooth">
+            {banners.map((b) => (
+              <div
+                key={b.id}
+                className="min-w-[90%] snap-center"
+              >
                 <BannerCard banner={b} />
               </div>
             ))}
           </div>
-        </section>
+        </div>
       )}
 
       {/* Статус текущего заказа */}
@@ -213,54 +218,6 @@ const HomeScreen: React.FC = () => {
           </div>
         </section>
       )}
-
-      {/* Баннеры */}
-      <section className="asked-card px-0 py-3 text-sm screen-card-pop">
-        <div className="px-4 flex items-center justify-between mb-2">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft">
-            баннеры
-          </div>
-          <div className="text-[10px] text-slate-500">
-            {loadingHome ? "загружаем…" : "для вдохновения"}
-          </div>
-        </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1 snap-x snap-mandatory">
-          {banners.map((b) => (
-            <button
-              key={b.id}
-              className="asked-tap snap-start min-w-[80%] max-w-[80%] md:min-w-[60%] md:max-w-[60%]"
-              onClick={() => navigate(b.to)}
-              type="button"
-            >
-              <div className="relative h-28 rounded-2xl overflow-hidden bg-slate-950/90 border border-slate-800">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(56,189,248,0.24),transparent_50%),radial-gradient(circle_at_100%_100%,rgba(129,140,248,0.28),transparent_55%)]" />
-                <div className="relative h-full w-full px-3 py-3 flex flex-col justify-between text-left">
-                  <div className="flex flex-col gap-0.5">
-                    <div className="text-[10px] uppercase tracking-[0.16em] text-slate-300">
-                      asked drop
-                    </div>
-                    <div className="text-[13px] font-semibold text-slate-50 leading-snug">
-                      {b.title}
-                    </div>
-                    <div className="text-[11px] text-slate-300">
-                      {b.subtitle}
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-askedAccentSoft flex items-center gap-1">
-                    <span>{b.cta}</span>
-                    <span>↗</span>
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-          {!loadingHome && !banners.length && (
-            <div className="px-4 text-[11px] text-slate-500">
-              Баннеры появятся позже.
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Большая кнопка Каталог */}
       <section className="asked-card px-4 py-3 text-sm screen-card-pop">

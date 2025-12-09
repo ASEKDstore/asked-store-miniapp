@@ -778,12 +778,12 @@ app.get("/home", (_req, res) => {
 // ====== Banners API ======
 
 // публичный список активных баннеров
-app.get("/banners", (_req, res) => {
+app.get("/api/banners", (_req, res) => {
   res.json({ ok: true, banners: getActiveBanners() });
 });
 
 // публичный один баннер по slug (для промо-страницы)
-app.get("/banners/:slug", (req, res) => {
+app.get("/api/banners/:slug", (req, res) => {
   const banner = getBannerBySlug(req.params.slug);
   if (!banner) {
     return res.status(404).json({ ok: false, error: "banner_not_found" });
@@ -1028,12 +1028,12 @@ app.patch("/admin/users/:telegramUserId/role", async (req, res) => {
 // ====== Admin Banners ======
 
 // список всех баннеров (для админки)
-app.get("/admin/banners", requireAdmin, (_req, res) => {
+app.get("/api/admin/banners", requireAdmin, (_req, res) => {
   res.json({ ok: true, banners: getAllBanners() });
 });
 
 // создание баннера
-app.post("/admin/banners", requireAdmin, (req, res) => {
+app.post("/api/admin/banners", requireAdmin, (req, res) => {
   const {
     slug,
     title,
@@ -1066,7 +1066,7 @@ app.post("/admin/banners", requireAdmin, (req, res) => {
 });
 
 // обновление баннера
-app.patch("/admin/banners/:id", requireAdmin, (req, res) => {
+app.patch("/api/admin/banners/:id", requireAdmin, (req, res) => {
   const banner = updateBanner(req.params.id, req.body);
   if (!banner) {
     return res.status(404).json({ ok: false, error: "banner_not_found" });
@@ -1075,7 +1075,7 @@ app.patch("/admin/banners/:id", requireAdmin, (req, res) => {
 });
 
 // удаление баннера
-app.delete("/admin/banners/:id", requireAdmin, (req, res) => {
+app.delete("/api/admin/banners/:id", requireAdmin, (req, res) => {
   const ok = deleteBanner(req.params.id);
   if (!ok) {
     return res.status(404).json({ ok: false, error: "banner_not_found" });

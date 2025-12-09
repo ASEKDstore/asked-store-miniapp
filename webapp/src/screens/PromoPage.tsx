@@ -34,7 +34,7 @@ const PromoPage: React.FC = () => {
 
     const fetchBanner = async () => {
       try {
-        const res = await fetch(`${API_BASE}/banners/${slug}`);
+        const res = await fetch(`${API_BASE}/api/banners/${slug}`);
         const data: PromoResponse = await res.json();
         if (data?.ok && data.banner) {
           setBanner(data.banner);
