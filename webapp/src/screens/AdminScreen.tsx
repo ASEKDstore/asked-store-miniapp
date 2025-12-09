@@ -83,9 +83,23 @@ type PromoCode = {
   createdAt: string;
 };
 
+type Banner = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  imageUrl: string;
+  buttonText: string;
+  buttonColor?: string;
+  description?: string;
+  dateEnd?: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
 const AdminScreen: React.FC = () => {
   const { user } = useTelegram();
-  const [tab, setTab] = useState<"products" | "home" | "promocodes" | "stats" | "files" | "users">(
+  const [tab, setTab] = useState<"products" | "home" | "promocodes" | "stats" | "files" | "users" | "banners">(
     "products"
   );
   const [authError, setAuthError] = useState<string | null>(null);
@@ -127,6 +141,21 @@ const AdminScreen: React.FC = () => {
   // Users
   const [users, setUsers] = useState<KnownUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+
+  // Banners
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [loadingBanners, setLoadingBanners] = useState(false);
+  const [newBanner, setNewBanner] = useState<Partial<Banner>>({
+    slug: "",
+    title: "",
+    subtitle: "",
+    imageUrl: "",
+    buttonText: "Подробнее",
+    buttonColor: "#A855F7",
+    description: "",
+    dateEnd: "",
+    isActive: true
+  });
 
   // Ранний возврат, если токен не задан
   if (!ADMIN_TOKEN) {
@@ -340,6 +369,98 @@ const AdminScreen: React.FC = () => {
     }
   };
 
+  const fetchBanners = async () => {
+    setLoadingBanners(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/banners`, {
+        headers: authHeader
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setAuthError(data.message || "Ошибка загрузки баннеров");
+      } else {
+        setBanners(data.banners || []);
+      }
+    } catch (e) {
+      console.error(e);
+      setAuthError("Ошибка связи с сервером при загрузке баннеров.");
+    } finally {
+      setLoadingBanners(false);
+    }
+  };
+
+  const handleCreateBanner = async () => {
+    if (!newBanner.slug || !newBanner.title || !newBanner.imageUrl || !newBanner.buttonText) {
+      setAuthError("Заполните обязательные поля: slug, title, imageUrl, buttonText");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/admin/banners`, {
+        method: "POST",
+        headers: authHeader,
+        body: JSON.stringify(newBanner)
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setAuthError(data.message || "Не удалось создать баннер");
+      } else {
+        setNewBanner({
+          slug: "",
+          title: "",
+          subtitle: "",
+          imageUrl: "",
+          buttonText: "Подробнее",
+          buttonColor: "#A855F7",
+          description: "",
+          dateEnd: "",
+          isActive: true
+        });
+        fetchBanners();
+      }
+    } catch (e) {
+      console.error(e);
+      setAuthError("Ошибка связи с сервером при создании баннера.");
+    }
+  };
+
+  const handleUpdateBanner = async (id: string, patch: Partial<Banner>) => {
+    try {
+      const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+        method: "PATCH",
+        headers: authHeader,
+        body: JSON.stringify(patch)
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setAuthError(data.message || "Не удалось обновить баннер");
+      } else {
+        fetchBanners();
+      }
+    } catch (e) {
+      console.error(e);
+      setAuthError("Ошибка связи с сервером при обновлении баннера.");
+    }
+  };
+
+  const handleDeleteBanner = async (id: string) => {
+    if (!confirm("Удалить баннер?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+        method: "DELETE",
+        headers: authHeader
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setAuthError(data.message || "Не удалось удалить баннер");
+      } else {
+        fetchBanners();
+      }
+    } catch (e) {
+      console.error(e);
+      setAuthError("Ошибка связи с сервером при удалении баннера.");
+    }
+  };
+
   useEffect(() => {
     if (!ADMIN_TOKEN) return;
     if (tab === "products") {
@@ -354,6 +475,8 @@ const AdminScreen: React.FC = () => {
       fetchFiles();
     } else if (tab === "users") {
       fetchUsers();
+    } else if (tab === "banners") {
+      fetchBanners();
     }
   }, [tab, ADMIN_TOKEN]);
 
@@ -449,7 +572,7 @@ const AdminScreen: React.FC = () => {
             admin
           </div>
           <div className="flex gap-1 text-[10px] flex-wrap">
-            {["products", "home", "promocodes", "stats", "files", "users"].map((t) => (
+            {["products", "home", "banners", "promocodes", "stats", "files", "users"].map((t) => (
               <button
                 key={t}
                 className={`px-2 py-1 rounded-lg border asked-tap ${
@@ -463,6 +586,8 @@ const AdminScreen: React.FC = () => {
                   ? "Товары"
                   : t === "home"
                   ? "Главная"
+                  : t === "banners"
+                  ? "Баннеры"
                   : t === "promocodes"
                   ? "Промокоды"
                   : t === "stats"

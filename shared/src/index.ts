@@ -1,4 +1,3 @@
-export {};
-// Здесь позже появятся общие типы и утилиты для webapp и backend
+export * from "./types";
 
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTelegram } from "@auth/useTelegram";
 import { useNavigate } from "react-router-dom";
+import { BannerCard, Banner } from "@components/BannerCard";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/$/, "") || "";
@@ -98,6 +99,9 @@ const HomeScreen: React.FC = () => {
   const [homeData, setHomeData] = useState<HomeResponse | null>(null);
   const [loadingHome, setLoadingHome] = useState(false);
 
+  const [promoBanners, setPromoBanners] = useState<Banner[]>([]);
+  const [loadingBanners, setLoadingBanners] = useState(false);
+
   useEffect(() => {
     if (!user?.id) {
       return;
@@ -137,6 +141,24 @@ const HomeScreen: React.FC = () => {
     fetchHome();
   }, []);
 
+  useEffect(() => {
+    const fetchBanners = async () => {
+      setLoadingBanners(true);
+      try {
+        const res = await fetch(`${API_BASE}/banners`);
+        const data = await res.json();
+        if (data?.ok && Array.isArray(data.banners)) {
+          setPromoBanners(data.banners.slice(0, 7)); // максимум 7 баннеров
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingBanners(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
   const hasOrder = lastOrder && lastOrder.ok;
   const hasHome = homeData && homeData.ok;
 
@@ -148,6 +170,19 @@ const HomeScreen: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-16">
+      {/* Промо-баннеры (новые) */}
+      {promoBanners.length > 0 && (
+        <section className="px-4">
+          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-1 -mx-4 px-4">
+            {promoBanners.map((b) => (
+              <div key={b.id} className="min-w-[90%] snap-center">
+                <BannerCard banner={b} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Статус текущего заказа */}
       {loadingOrder && (
         <section className="asked-card px-4 py-3 text-[11px] screen-card-pop">

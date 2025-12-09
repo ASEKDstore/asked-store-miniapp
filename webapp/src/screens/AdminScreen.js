@@ -37,6 +37,20 @@ const AdminScreen = () => {
     // Users
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
+    // Banners
+    const [banners, setBanners] = useState([]);
+    const [loadingBanners, setLoadingBanners] = useState(false);
+    const [newBanner, setNewBanner] = useState({
+        slug: "",
+        title: "",
+        subtitle: "",
+        imageUrl: "",
+        buttonText: "Подробнее",
+        buttonColor: "#A855F7",
+        description: "",
+        dateEnd: "",
+        isActive: true
+    });
     // Ранний возврат, если токен не задан
     if (!ADMIN_TOKEN) {
         return (_jsx("div", { className: "space-y-4 pb-16", children: _jsxs("section", { className: "asked-card px-4 py-4 text-sm screen-card-pop", children: [_jsx("div", { className: "text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft mb-1", children: "admin" }), _jsx("div", { className: "font-semibold mb-1", children: "\u0410\u0434\u043C\u0438\u043D-\u043F\u0430\u043D\u0435\u043B\u044C \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u0430" }), _jsx("p", { className: "text-[11px] text-slate-400", children: "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D VITE_ADMIN_TOKEN. \u0414\u043E\u0431\u0430\u0432\u044C \u0435\u0433\u043E \u0432 .env \u0444\u0440\u043E\u043D\u0442\u0430 \u0438 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u0442\u0438 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435, \u0447\u0442\u043E\u0431\u044B \u0443\u043F\u0440\u0430\u0432\u043B\u044F\u0442\u044C \u043A\u043E\u043D\u0442\u0435\u043D\u0442\u043E\u043C \u0438 \u0442\u043E\u0432\u0430\u0440\u0430\u043C\u0438." })] }) }));
@@ -248,6 +262,104 @@ const AdminScreen = () => {
             setAuthError("Ошибка связи с сервером при обновлении роли.");
         }
     };
+    const fetchBanners = async () => {
+        setLoadingBanners(true);
+        try {
+            const res = await fetch(`${API_BASE}/admin/banners`, {
+                headers: authHeader
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                setAuthError(data.message || "Ошибка загрузки баннеров");
+            }
+            else {
+                setBanners(data.banners || []);
+            }
+        }
+        catch (e) {
+            console.error(e);
+            setAuthError("Ошибка связи с сервером при загрузке баннеров.");
+        }
+        finally {
+            setLoadingBanners(false);
+        }
+    };
+    const handleCreateBanner = async () => {
+        if (!newBanner.slug || !newBanner.title || !newBanner.imageUrl || !newBanner.buttonText) {
+            setAuthError("Заполните обязательные поля: slug, title, imageUrl, buttonText");
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/admin/banners`, {
+                method: "POST",
+                headers: authHeader,
+                body: JSON.stringify(newBanner)
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                setAuthError(data.message || "Не удалось создать баннер");
+            }
+            else {
+                setNewBanner({
+                    slug: "",
+                    title: "",
+                    subtitle: "",
+                    imageUrl: "",
+                    buttonText: "Подробнее",
+                    buttonColor: "#A855F7",
+                    description: "",
+                    dateEnd: "",
+                    isActive: true
+                });
+                fetchBanners();
+            }
+        }
+        catch (e) {
+            console.error(e);
+            setAuthError("Ошибка связи с сервером при создании баннера.");
+        }
+    };
+    const handleUpdateBanner = async (id, patch) => {
+        try {
+            const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+                method: "PATCH",
+                headers: authHeader,
+                body: JSON.stringify(patch)
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                setAuthError(data.message || "Не удалось обновить баннер");
+            }
+            else {
+                fetchBanners();
+            }
+        }
+        catch (e) {
+            console.error(e);
+            setAuthError("Ошибка связи с сервером при обновлении баннера.");
+        }
+    };
+    const handleDeleteBanner = async (id) => {
+        if (!confirm("Удалить баннер?"))
+            return;
+        try {
+            const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
+                method: "DELETE",
+                headers: authHeader
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                setAuthError(data.message || "Не удалось удалить баннер");
+            }
+            else {
+                fetchBanners();
+            }
+        }
+        catch (e) {
+            console.error(e);
+            setAuthError("Ошибка связи с сервером при удалении баннера.");
+        }
+    };
     useEffect(() => {
         if (!ADMIN_TOKEN)
             return;
@@ -268,6 +380,9 @@ const AdminScreen = () => {
         }
         else if (tab === "users") {
             fetchUsers();
+        }
+        else if (tab === "banners") {
+            fetchBanners();
         }
     }, [tab, ADMIN_TOKEN]);
     // Realtime обновление статистики
@@ -359,19 +474,21 @@ const AdminScreen = () => {
             setAuthError("Ошибка связи с сервером при генерации промокодов.");
         }
     };
-    return (_jsx("div", { className: "space-y-3 pb-16 text-xs", children: _jsxs("section", { className: "asked-card px-4 py-3 screen-card-pop", children: [_jsxs("div", { className: "flex items-center justify-between mb-2", children: [_jsx("div", { className: "text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft", children: "admin" }), _jsx("div", { className: "flex gap-1 text-[10px] flex-wrap", children: ["products", "home", "promocodes", "stats", "files", "users"].map((t) => (_jsx("button", { className: `px-2 py-1 rounded-lg border asked-tap ${tab === t
+    return (_jsx("div", { className: "space-y-3 pb-16 text-xs", children: _jsxs("section", { className: "asked-card px-4 py-3 screen-card-pop", children: [_jsxs("div", { className: "flex items-center justify-between mb-2", children: [_jsx("div", { className: "text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft", children: "admin" }), _jsx("div", { className: "flex gap-1 text-[10px] flex-wrap", children: ["products", "home", "banners", "promocodes", "stats", "files", "users"].map((t) => (_jsx("button", { className: `px-2 py-1 rounded-lg border asked-tap ${tab === t
                                     ? "border-askedAccentSoft bg-askedAccentSoft/10 text-slate-50"
                                     : "border-slate-700 text-slate-400"}`, onClick: () => setTab(t), children: t === "products"
                                     ? "Товары"
                                     : t === "home"
                                         ? "Главная"
-                                        : t === "promocodes"
-                                            ? "Промокоды"
-                                            : t === "stats"
-                                                ? "Статистика"
-                                                : t === "files"
-                                                    ? "Файлы"
-                                                    : "Пользователи" }, t))) })] }), authError && (_jsx("div", { className: "text-[11px] text-red-400 mb-2", children: authError })), tab === "products" && (_jsxs("div", { className: "space-y-3", children: [_jsx("div", { className: "text-[11px] text-slate-400 mb-1", children: "\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0442\u043E\u0432\u0430\u0440\u0430\u043C\u0438 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430" }), loadingProducts ? (_jsx("div", { className: "text-[11px] text-slate-500", children: "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C\u2026" })) : (_jsxs("div", { className: "max-h-52 overflow-y-auto no-scrollbar space-y-1", children: [products.map((p) => (_jsxs("div", { className: "border border-slate-800 rounded-lg px-3 py-2 flex flex-col gap-1", children: [_jsxs("div", { className: "flex items-center justify-between gap-2", children: [_jsx("div", { className: "font-semibold text-[11px] text-slate-100", children: p.name }), _jsxs("div", { className: "text-[10px] text-askedAccentSoft", children: [p.price.toLocaleString("ru-RU"), " \u20BD"] })] }), _jsxs("div", { className: "text-[10px] text-slate-500", children: [p.category, " \u00B7 ", p.tag || "—"] }), _jsx("div", { className: "text-[10px] text-slate-500 truncate", children: p.imageUrl })] }, p.id))), !products.length && (_jsx("div", { className: "text-[11px] text-slate-500", children: "\u0422\u043E\u0432\u0430\u0440\u043E\u0432 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442." }))] })), _jsxs("div", { className: "mt-2 pt-2 border-t border-slate-800", children: [_jsx("div", { className: "text-[11px] text-slate-400 mb-1", children: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u043E\u0432\u0430\u0440" }), _jsxs("div", { className: "grid grid-cols-2 gap-2", children: [_jsx("input", { className: "bg-slate-950/70 border border-slate-800 rounded-xl px-2 py-1 outline-none text-[11px]", placeholder: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435", value: newProduct.name || "", onChange: (e) => setNewProduct((p) => ({ ...p, name: e.target.value })) }), _jsx("input", { className: "bg-slate-950/70 border border-slate-800 rounded-xl px-2 py-1 outline-none text-[11px]", placeholder: "\u0426\u0435\u043D\u0430", type: "number", value: newProduct.price || 0, onChange: (e) => setNewProduct((p) => ({
+                                        : t === "banners"
+                                            ? "Баннеры"
+                                            : t === "promocodes"
+                                                ? "Промокоды"
+                                                : t === "stats"
+                                                    ? "Статистика"
+                                                    : t === "files"
+                                                        ? "Файлы"
+                                                        : "Пользователи" }, t))) })] }), authError && (_jsx("div", { className: "text-[11px] text-red-400 mb-2", children: authError })), tab === "products" && (_jsxs("div", { className: "space-y-3", children: [_jsx("div", { className: "text-[11px] text-slate-400 mb-1", children: "\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0442\u043E\u0432\u0430\u0440\u0430\u043C\u0438 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430" }), loadingProducts ? (_jsx("div", { className: "text-[11px] text-slate-500", children: "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C\u2026" })) : (_jsxs("div", { className: "max-h-52 overflow-y-auto no-scrollbar space-y-1", children: [products.map((p) => (_jsxs("div", { className: "border border-slate-800 rounded-lg px-3 py-2 flex flex-col gap-1", children: [_jsxs("div", { className: "flex items-center justify-between gap-2", children: [_jsx("div", { className: "font-semibold text-[11px] text-slate-100", children: p.name }), _jsxs("div", { className: "text-[10px] text-askedAccentSoft", children: [p.price.toLocaleString("ru-RU"), " \u20BD"] })] }), _jsxs("div", { className: "text-[10px] text-slate-500", children: [p.category, " \u00B7 ", p.tag || "—"] }), _jsx("div", { className: "text-[10px] text-slate-500 truncate", children: p.imageUrl })] }, p.id))), !products.length && (_jsx("div", { className: "text-[11px] text-slate-500", children: "\u0422\u043E\u0432\u0430\u0440\u043E\u0432 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442." }))] })), _jsxs("div", { className: "mt-2 pt-2 border-t border-slate-800", children: [_jsx("div", { className: "text-[11px] text-slate-400 mb-1", children: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u043E\u0432\u0430\u0440" }), _jsxs("div", { className: "grid grid-cols-2 gap-2", children: [_jsx("input", { className: "bg-slate-950/70 border border-slate-800 rounded-xl px-2 py-1 outline-none text-[11px]", placeholder: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435", value: newProduct.name || "", onChange: (e) => setNewProduct((p) => ({ ...p, name: e.target.value })) }), _jsx("input", { className: "bg-slate-950/70 border border-slate-800 rounded-xl px-2 py-1 outline-none text-[11px]", placeholder: "\u0426\u0435\u043D\u0430", type: "number", value: newProduct.price || 0, onChange: (e) => setNewProduct((p) => ({
                                                 ...p,
                                                 price: Number(e.target.value) || 0
                                             })) }), _jsxs("select", { className: "bg-slate-950/70 border border-slate-800 rounded-xl px-2 py-1 outline-none text-[11px]", value: newProduct.category || "hoodie", onChange: (e) => setNewProduct((p) => ({

@@ -18,6 +18,7 @@ import JoinTeamScreen from "@screens/JoinTeamScreen";
 import CheckoutScreen from "@screens/CheckoutScreen";
 import AdminScreen from "@screens/AdminScreen";
 import AccountScreen from "@screens/AccountScreen";
+import PromoPage from "@screens/PromoPage";
 
 const App: React.FC = () => {
   const { isReady } = useTelegram();
@@ -53,6 +54,7 @@ const App: React.FC = () => {
 
           <Route path="admin" element={<AdminScreen />} />
           <Route path="account" element={<AccountScreen />} />
+          <Route path="promo/:slug" element={<PromoPage />} />
 
           <Route path="*" element={<NotFoundScreen />} />
         </Route>
