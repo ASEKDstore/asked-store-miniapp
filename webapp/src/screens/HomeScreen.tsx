@@ -37,7 +37,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE}/banners`);
+        const res = await fetch(`${API_BASE}/api/banners`);
         const json = await res.json();
         if (json.ok && Array.isArray(json.banners) && json.banners.length > 0) {
           setBanners(json.banners);
