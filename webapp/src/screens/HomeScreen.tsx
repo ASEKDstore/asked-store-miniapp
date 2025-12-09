@@ -1,186 +1,70 @@
 import React, { useEffect, useState } from "react";
-import { useTelegram } from "@auth/useTelegram";
-import { useNavigate } from "react-router-dom";
-import { BannerCard, Banner } from "@components/BannerCard";
+import { Banner, BannerCard } from "@components/BannerCard";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/$/, "") || "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-type OrderStatus = "processing" | "packing" | "delivery" | "delivered";
-
-type LastOrderResponse =
-  | {
-      ok: true;
-      order: {
-        id: number;
-        number: string;
-        status: OrderStatus;
-      };
-    }
-  | {
-      ok: false;
-      message?: string;
-    };
-
-function statusToText(status: OrderStatus): string {
-  switch (status) {
-    case "processing":
-      return "обрабатывается";
-    case "packing":
-      return "собирается";
-    case "delivery":
-      return "доставляется";
-    case "delivered":
-      return "доставлен";
-    default:
-      return status;
-  }
-}
-
-// Типы для /home
-
-type HomeBanner = {
-  id: string;
-  title: string;
-  subtitle: string;
-  cta: string;
-  to: string;
-};
-
-type HomeTopProduct = {
-  id: string;
-  name: string;
-  price: number;
-  tag?: string;
-  to: string;
-};
-
-type HomePromo = {
-  id: string;
-  title: string;
-  text: string;
-};
-
-type HomeGalleryItem = {
-  id: string;
-  label: string;
-  type: string;
-  imageUrl: string;
-};
-
-type HomeSocial = {
-  id: string;
-  label: string;
-  handle: string;
-  soon?: boolean;
-};
-
-type HomeResponse =
-  | {
-      ok: true;
-      banners: HomeBanner[];
-      topProducts: HomeTopProduct[];
-      promos: HomePromo[];
-      gallery: HomeGalleryItem[];
-      socials: HomeSocial[];
-    }
-  | {
-      ok: false;
-      message?: string;
-    };
+// моковые баннеры на случай, если API ничего не отдаёт
+const MOCK_BANNERS: Banner[] = [
+  {
+    id: "mock-1",
+    slug: "night-drop-blue",
+    title: "Ночной дроп с Синим",
+    subtitle: "Худи, кепки и цифровые пропуска",
+    imageUrl: "https://images.pexels.com/photos/994517/pexels-photo-994517.jpeg",
+    buttonText: "Смотреть дроп",
+    buttonColor: "#6366F1",
+    description: "Тестовый дроп для демонстрации баннеров.",
+    dateEnd: undefined,
+    isActive: true,
+  },
+  {
+    id: "mock-2",
+    slug: "limited-pass",
+    title: "Limited-доступ ASKED",
+    subtitle: "Активируй пропуск и открой закрытые дропы",
+    imageUrl: "https://images.pexels.com/photos/3738081/pexels-photo-3738081.jpeg",
+    buttonText: "Открыть Limited",
+    buttonColor: "#A855F7",
+    description: "Лимитированный пропуск в закрытую часть ASKED.",
+    dateEnd: undefined,
+    isActive: true,
+  },
+];
 
 const HomeScreen: React.FC = () => {
-  const { user } = useTelegram();
-  const navigate = useNavigate();
-
-  const [lastOrder, setLastOrder] = useState<LastOrderResponse | null>(null);
-  const [loadingOrder, setLoadingOrder] = useState(false);
-
-  const [homeData, setHomeData] = useState<HomeResponse | null>(null);
-  const [loadingHome, setLoadingHome] = useState(false);
-
-  const [promoBanners, setPromoBanners] = useState<Banner[]>([]);
-  const [loadingBanners, setLoadingBanners] = useState(false);
+  const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
 
   useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
-    const fetchLastOrder = async () => {
-      setLoadingOrder(true);
+    const load = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE}/orders/last?telegramId=${user.id}`
-        );
-        const data: LastOrderResponse = await res.json();
-        setLastOrder(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingOrder(false);
-      }
-    };
-
-    fetchLastOrder();
-  }, [user?.id]);
-
-  useEffect(() => {
-    const fetchHome = async () => {
-      setLoadingHome(true);
-      try {
-        const res = await fetch(`${API_BASE}/home`);
-        const data: HomeResponse = await res.json();
-        setHomeData(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingHome(false);
-      }
-    };
-
-    fetchHome();
-  }, []);
-
-  useEffect(() => {
-    const fetchBanners = async () => {
-      setLoadingBanners(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/banners`);
-        const data = await res.json();
-        if (data?.ok && Array.isArray(data.banners)) {
-          setPromoBanners(data.banners.slice(0, 7)); // максимум 7 баннеров
+        const res = await fetch(`${API_BASE}/banners`);
+        const json = await res.json();
+        if (json.ok && Array.isArray(json.banners) && json.banners.length > 0) {
+          setBanners(json.banners);
         }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingBanners(false);
+      } catch {
+        // игнорируем — останутся моки
       }
     };
-    fetchBanners();
+    load();
   }, []);
-
-  const hasOrder = lastOrder && lastOrder.ok;
-  const hasHome = homeData && homeData.ok;
-
-  const topProducts = hasHome ? homeData!.topProducts : [];
-  const promos = hasHome ? homeData!.promos : [];
-  const gallery = hasHome ? homeData!.gallery : [];
-  const socials = hasHome ? homeData!.socials : [];
-
-  // Используем только новые промо-баннеры
-  const banners = promoBanners;
 
   return (
-    <div className="space-y-4 pb-16 px-4">
-      {/* Промо-баннеры (новые) */}
+    <div className="min-h-screen bg-black text-white pb-24">
+      {/* БЛОК БАННЕРОВ */}
       {banners.length > 0 && (
-        <div className="mb-6 mt-2">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-1 pb-2 scroll-smooth">
+        <div className="mt-2 mb-6 px-4">
+          <div className="flex justify-between items-baseline mb-3">
+            <span className="text-[11px] tracking-[0.22em] uppercase text-white/50">
+              Баннеры
+            </span>
+            <span className="text-[11px] text-white/40">
+              для вдохновения
+            </span>
+          </div>
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
             {banners.map((b) => (
-              <div
-                key={b.id}
-                className="min-w-[90%] snap-center"
-              >
+              <div key={b.id} className="min-w-[90%] snap-center">
                 <BannerCard banner={b} />
               </div>
             ))}
@@ -188,201 +72,42 @@ const HomeScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Статус текущего заказа */}
-      {loadingOrder && (
-        <section className="asked-card px-4 py-3 text-[11px] screen-card-pop">
-          <div className="text-slate-400">Проверяем статус заказа…</div>
-        </section>
-      )}
+      {/* ДАЛЬШЕ МОЖНО ПОСТАВИТЬ УЖЕ СУЩЕСТВУЮЩИЕ БЛОКИ ГЛАВНОЙ:
+          Витрина, Топ товары, акции и т.д.
+          Если в проекте есть готовые компоненты для этого,
+          подключи их здесь, не ломая текущий UI. 
+       */}
 
-      {!loadingOrder && hasOrder && lastOrder && lastOrder.ok && (
-        <section className="asked-card px-4 py-3 text-[11px] screen-card-pop">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-askedAccentSoft mb-1">
-            текущий заказ
+      <div className="px-4">
+        <div className="mt-2 mb-4">
+          <div className="text-[11px] tracking-[0.22em] uppercase text-white/50 mb-2">
+            Витрина
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">
-                Заказ №{lastOrder.order.number}
-              </span>
-              <span className="text-[11px] text-slate-400">
-                Статус: {statusToText(lastOrder.order.status)}
-              </span>
+          <div className="rounded-3xl bg-white/5 border border-white/10 px-4 py-4 text-sm text-white/80">
+            Здесь можно оставить твой существующий блок "Открыть каталог",
+            либо переиспользовать старый компонент, если он был.
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-[11px] tracking-[0.22em] uppercase text-white/50">
+              Топ товары
             </div>
-            <button
-              className="asked-tap px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-[11px]"
-              onClick={() => navigate("/cart")}
-            >
-              Открыть корзину
-            </button>
+            <button className="text-[11px] text-white/40">все</button>
           </div>
-        </section>
-      )}
-
-      {/* Большая кнопка Каталог */}
-      <section className="asked-card px-4 py-3 text-sm screen-card-pop">
-        <div className="flex flex-col gap-2">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
-            витрина
-          </div>
-          <button
-            className="asked-tap w-full py-3 rounded-2xl bg-askedAccentSoft text-[13px] font-semibold"
-            onClick={() => navigate("/catalog")}
-          >
-            Открыть каталог
-          </button>
-          <p className="text-[10px] text-slate-500">
-            Здесь собраны все текущие дропы, базовые позиции и тестовые заглушки
-            под будущие коллекции.
-          </p>
-        </div>
-      </section>
-
-      {/* Топ товары */}
-      <section className="asked-card px-4 py-3 text-sm screen-card-pop">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft">
-            топ товары
-          </div>
-          <button
-            className="text-[10px] text-slate-500 asked-tap"
-            onClick={() => navigate("/catalog")}
-          >
-            все
-          </button>
-        </div>
-        {loadingHome && !topProducts.length ? (
-          <div className="text-[11px] text-slate-500">Загружаем топ…</div>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-            {topProducts.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className="asked-tap snap-start min-w-[70%] max-w-[70%] md:min-w-[45%] md:max-w-[45%] text-left"
-                onClick={() => navigate(p.to)}
-              >
-                <div className="catalog-card flex flex-col overflow-hidden card-pop">
-                  <div className="w-full aspect-square bg-slate-900/70 border-b border-slate-800 flex items-center justify-center text-[10px] text-slate-500">
-                    IMG
-                  </div>
-                  <div className="px-3 py-2 flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="text-[11px] font-medium text-slate-100 leading-tight line-clamp-2">
-                        {p.name}
-                      </div>
-                      {p.tag && (
-                        <span className="text-[9px] uppercase tracking-[0.16em] text-askedAccentSoft">
-                          {p.tag}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1 text-[12px] text-askedAccentSoft font-semibold">
-                      {p.price.toLocaleString("ru-RU")} ₽
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
-            {!loadingHome && !topProducts.length && (
-              <div className="text-[11px] text-slate-500">
-                Топ товаров появится после первых заказов.
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* Акции */}
-      <section className="asked-card px-4 py-3 text-sm screen-card-pop">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft mb-1">
-          акции и условия
-        </div>
-        {loadingHome && !promos.length ? (
-          <p className="text-[11px] text-slate-500">Загружаем акции…</p>
-        ) : (
-          <ul className="space-y-2 text-[11px] text-slate-300">
-            {promos.map((promo) => (
-              <li
-                key={promo.id}
-                className="border border-slate-800 rounded-xl px-3 py-2 bg-slate-950/60"
-              >
-                <div className="font-semibold text-slate-50 text-[11px] mb-0.5">
-                  {promo.title}
-                </div>
-                <div className="text-[10px] text-slate-400">{promo.text}</div>
-              </li>
-            ))}
-            {!loadingHome && !promos.length && (
-              <li className="text-[11px] text-slate-500">
-                Акции появятся позже.
-              </li>
-            )}
-          </ul>
-        )}
-      </section>
-
-      {/* Галерея */}
-      <section className="asked-card px-4 py-3 text-sm screen-card-pop">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft">
-            галерея
+          {/* сюда можно подключить существующий компонент "TopProducts",
+              если он есть в проекте. Пока оставим заглушку: */}
+          <div className="grid grid-cols-2 gap-3 opacity-50 text-xs text-white/40">
+            <div className="h-[140px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+              IMG
+            </div>
+            <div className="h-[140px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+              IMG
+            </div>
           </div>
         </div>
-        {loadingHome && !gallery.length ? (
-          <p className="text-[11px] text-slate-500">Загружаем галерею…</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {gallery.map((g) => (
-              <div
-                key={g.id}
-                className="relative rounded-xl overflow-hidden bg-slate-900/80 border border-slate-800 h-20 flex items-end"
-              >
-                <img
-                  src={g.imageUrl}
-                  alt={g.label}
-                  className="absolute inset-0 w-full h-full object-cover opacity-80"
-                />
-                <div className="relative w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 flex items-end">
-                  <span className="text-[10px] text-slate-100 font-medium">
-                    {g.label}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {!loadingHome && !gallery.length && (
-              <div className="text-[11px] text-slate-500">
-                Галерея появится позже.
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* Соцсети */}
-      <section className="asked-card px-4 py-3 text-sm screen-card-pop mb-2">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-askedAccentSoft mb-1">
-          соцсети
-        </div>
-        {loadingHome && !socials.length ? (
-          <p className="text-[11px] text-slate-500">Загружаем соцсети…</p>
-        ) : (
-          <div className="flex flex-col gap-2 text-[11px]">
-            {socials.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className="asked-tap w-full py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 flex items-center justify-between px-3"
-              >
-                <span>{s.label}</span>
-                <span className="text-[10px] text-slate-500">
-                  {s.handle}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+      </div>
     </div>
   );
 };

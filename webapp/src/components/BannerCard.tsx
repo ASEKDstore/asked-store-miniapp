@@ -12,7 +12,7 @@ export interface Banner {
   description?: string;
   dateEnd?: string;
   isActive: boolean;
-  createdAt: string;
+  createdAt?: string;
 }
 
 interface BannerCardProps {
@@ -39,11 +39,14 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
       />
 
       {/* затемнение */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/10" />
 
       {/* контент */}
       <div className="relative h-full flex flex-col justify-between p-4">
-        <div className="space-y-1 max-w-[75%]">
+        <div className="space-y-1 max-w-[80%]">
+          <span className="text-[11px] uppercase tracking-[0.22em] text-white/50">
+            ASKED DROP
+          </span>
           <h2 className="text-xl font-bold leading-tight text-white">
             {banner.title}
           </h2>
@@ -55,18 +58,17 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            className="px-6 py-2 text-sm font-semibold rounded-full shadow-md text-white"
-            style={{ backgroundColor: banner.buttonColor || "#A855F7" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick();
+            className="px-6 py-2 text-sm font-semibold rounded-full shadow-md bg-white text-black active:scale-95 transition"
+            style={{
+              backgroundColor: banner.buttonColor || "#A855F7",
+              color: "#fff",
             }}
           >
-            {banner.buttonText}
+            {banner.buttonText || "Подробнее"}
           </button>
 
           <div className="flex flex-col items-end text-[10px] text-white/70">
-            <span className="uppercase tracking-[0.15em]">Limited</span>
+            <span className="uppercase tracking-[0.18em]">Limited</span>
             <span>от ASKED</span>
           </div>
         </div>
@@ -74,4 +76,3 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
     </div>
   );
 };
-

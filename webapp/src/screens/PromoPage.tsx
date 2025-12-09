@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Banner } from "@components/BannerCard";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/$/, "") || "";
-
-interface PromoResponse {
-  ok: boolean;
-  banner: Banner;
-  error?: string;
-}
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const getTimeDiff = (dateEnd?: string) => {
   if (!dateEnd) return null;
@@ -25,55 +18,45 @@ const getTimeDiff = (dateEnd?: string) => {
 
 const PromoPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [banner, setBanner] = useState<Banner | null>(null);
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeDiff> | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!slug) return;
+    const load = async () => {
+      if (!slug) return;
 
-    const fetchBanner = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/banners/${slug}`);
-        const data: PromoResponse = await res.json();
-        if (data?.ok && data.banner) {
-          setBanner(data.banner);
+        const json = await res.json();
+        if (json.ok && json.banner) {
+          setBanner(json.banner);
+        } else {
+          // fallback: вернуться назад
+          navigate(-1);
         }
       } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+        navigate(-1);
       }
     };
-
-    fetchBanner();
-  }, [slug]);
+    load();
+  }, [slug, navigate]);
 
   useEffect(() => {
     if (!banner?.dateEnd) return;
+
     const tick = () => {
       setTimeLeft(getTimeDiff(banner.dateEnd));
     };
     tick();
-    const id = setInterval(tick, 60000); // обновляем раз в минуту
+    const id = setInterval(tick, 60000);
     return () => clearInterval(id);
   }, [banner?.dateEnd]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        Загрузка...
-      </div>
-    );
-  }
 
   if (!banner) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="text-center">
-          <h1 className="text-xl font-semibold mb-2">Баннер не найден</h1>
-          <p className="text-sm text-white/60">Попробуйте вернуться на главную</p>
-        </div>
+        Загрузка…
       </div>
     );
   }
@@ -82,13 +65,21 @@ const PromoPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* верхний баннер */}
       <div className="relative w-full h-[260px] overflow-hidden rounded-b-3xl">
         <img
           src={banner.imageUrl}
           alt={banner.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white/80 text-lg"
+        >
+          ←
+        </button>
         <div className="absolute bottom-4 left-4 right-4 space-y-2">
           <h1 className="text-2xl font-bold leading-tight">{banner.title}</h1>
           {banner.subtitle && (
@@ -97,10 +88,11 @@ const PromoPage: React.FC = () => {
         </div>
       </div>
 
+      {/* контент */}
       <div className="px-4 py-4 space-y-4">
         {banner.dateEnd && (
           <div className="rounded-2xl bg-white/5 border border-white/10 px-4 py-3 flex items-center justify-between">
-            <div className="text-xs text-white/60 uppercase tracking-[0.2em]">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/50">
               До конца акции
             </div>
             {expired ? (
@@ -127,8 +119,7 @@ const PromoPage: React.FC = () => {
 
         <button
           type="button"
-          className="w-full mt-2 py-3 rounded-full text-sm font-semibold shadow-lg text-white"
-          style={{ backgroundColor: banner.buttonColor || "#A855F7" }}
+          className="w-full mt-2 py-3 rounded-full text-sm font-semibold shadow-lg bg-[#A855F7] active:scale-95 transition"
         >
           {banner.buttonText || "Участвовать"}
         </button>
@@ -138,4 +129,3 @@ const PromoPage: React.FC = () => {
 };
 
 export default PromoPage;
-
