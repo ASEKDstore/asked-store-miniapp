@@ -340,16 +340,43 @@ const promoCodes: PromoCode[] = [];
 const userRoles: Record<number, UserRole> = {};
 
 const OWNER_TELEGRAM_ID = process.env.OWNER_TELEGRAM_ID
-  ? Number(process.env.OWNER_TELEGRAM_ID)
+  ? String(process.env.OWNER_TELEGRAM_ID)
   : undefined;
 
 // ====== Helpers ======
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
 
+/**
+ * Определяет роль пользователя на основе Telegram ID
+ * Владелец (OWNER_TELEGRAM_ID) всегда получает роль "admin"
+ */
+function resolveUserRole(
+  telegramId?: string | number,
+  currentRole?: UserRole
+): UserRole {
+  const tid = telegramId ? String(telegramId) : undefined;
+
+  // 1) Владелец всегда admin
+  if (tid && OWNER_TELEGRAM_ID && tid === OWNER_TELEGRAM_ID) {
+    return "admin";
+  }
+
+  // 2) Если в базе уже сохранена более высокая роль (manager/admin) — не занижаем
+  if (currentRole === "admin" || currentRole === "manager") {
+    return currentRole;
+  }
+
+  // 3) По умолчанию — user
+  return "user";
+}
+
 function isAdminTelegramId(id: number | undefined): boolean {
   if (!id) return false;
-  if (OWNER_TELEGRAM_ID && id === OWNER_TELEGRAM_ID) return true;
+  const idStr = String(id);
+  
+  // Владелец всегда админ
+  if (OWNER_TELEGRAM_ID && idStr === OWNER_TELEGRAM_ID) return true;
 
   const envIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || "")
     .split(",")
@@ -358,8 +385,10 @@ function isAdminTelegramId(id: number | undefined): boolean {
 
   if (envIds.includes(id)) return true;
 
-  const role = userRoles[id];
-  return role === "admin" || role === "manager";
+  // Проверяем роль из userRoles, используя resolveUserRole для актуальной роли
+  const currentRole = userRoles[id];
+  const resolvedRole = resolveUserRole(id, currentRole);
+  return resolvedRole === "admin" || resolvedRole === "manager";
 }
 
 function requireAdmin(
@@ -367,6 +396,17 @@ function requireAdmin(
   res: express.Response,
   next: express.NextFunction
 ) {
+  // Telegram id из заголовка
+  const tgIdHeader = req.headers["x-telegram-id"];
+  const telegramId = tgIdHeader ? String(tgIdHeader) : undefined;
+
+  // 1) Если это владелец — всегда пропускаем как admin
+  if (telegramId && OWNER_TELEGRAM_ID && telegramId === OWNER_TELEGRAM_ID) {
+    console.log("OWNER_TELEGRAM_ID имеет роль admin и допущен в админку.");
+    return next();
+  }
+
+  // 2) Проверка токена
   const authHeader = req.headers["authorization"];
   if (!ADMIN_TOKEN) {
     return res.status(500).json({
@@ -388,9 +428,8 @@ function requireAdmin(
     });
   }
 
-  const tgIdHeader = req.headers["x-telegram-id"];
+  // 3) Проверка роли для остальных пользователей
   const tgId = tgIdHeader ? Number(tgIdHeader) : undefined;
-
   if (!isAdminTelegramId(tgId)) {
     return res.status(403).json({
       ok: false,
@@ -585,10 +624,8 @@ app.post("/orders", async (req, res) => {
 
   // запись базовой роли для нового пользователя
   if (tgIdNum) {
-    if (!userRoles[tgIdNum]) {
-      userRoles[tgIdNum] =
-        OWNER_TELEGRAM_ID && tgIdNum === OWNER_TELEGRAM_ID ? "admin" : "user";
-    }
+    const currentRole = userRoles[tgIdNum];
+    userRoles[tgIdNum] = resolveUserRole(tgIdNum, currentRole);
   }
 
   await sendAdminNotification(
@@ -914,12 +951,16 @@ app.get("/admin/users", (_req, res) => {
   for (const o of orders) {
     if (!o.telegramUserId) continue;
     const id = o.telegramUserId;
+    const currentRole = userRoles[id];
+    const resolvedRole = resolveUserRole(id, currentRole);
     const existing = map.get(id) || {
       telegramUserId: id,
       telegramUsername: o.telegramUsername,
-      role: userRoles[id] || "user",
+      role: resolvedRole,
       ordersCount: 0
     };
+    // Обновляем роль на актуальную (на случай если владелец)
+    existing.role = resolveUserRole(id, existing.role);
     existing.ordersCount += 1;
     if (!existing.telegramUsername && o.telegramUsername) {
       existing.telegramUsername = o.telegramUsername;
