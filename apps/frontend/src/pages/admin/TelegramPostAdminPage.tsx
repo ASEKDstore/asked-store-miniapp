@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useAdminApi } from '../../api/adminApi'
 import './AdminPages.css'
 
@@ -101,7 +101,7 @@ export const TelegramPostAdminPage: React.FC = () => {
     try {
       const result = await api.sendTelegramPost({
         mode,
-        channelChatId: channelChatIdEditable ? channelChatId.trim() : undefined,
+        channelChatId: channelChatIdEditable ? (channelChatId.trim() || '@asked_store') : undefined,
         text: text.trim(),
         imageUrl: imageUrl.trim() || undefined,
         buttons: buttons.length > 0 ? buttons : undefined,

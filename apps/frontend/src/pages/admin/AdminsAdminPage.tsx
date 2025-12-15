@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useAdminApi } from '../../api/adminApi'
 import { ROOT_ADMIN_ID } from '../../config/admins'
 import './AdminPages.css'

@@ -1,9 +1,8 @@
-import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { type ReactNode } from 'react'
 import { useUser } from '../context/UserContext'
 import { isAdminId } from '../config/admins'
 
-export const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AdminGuard: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useUser()
 
   if (!user) {

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSafeNavigate } from '../../hooks/useSafeNavigate'
 import './home-tiles.css'
 
-export const HomeTiles: React.FC = () => {
+export const HomeTiles = () => {
   const safeNavigate = useSafeNavigate()
   const [mounted, setMounted] = useState(false)
 

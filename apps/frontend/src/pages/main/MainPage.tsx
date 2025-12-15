@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { Banners } from '../../modules/banners/Banners'
 import { HomeTiles } from '../../modules/tiles/HomeTiles'
 import { ProductShowcaseCarousel } from '../../components/ProductShowcaseCarousel'

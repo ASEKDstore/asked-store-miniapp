@@ -1,4 +1,3 @@
-import React from 'react'
 import './FloatingPromocodes.css'
 
 export function FloatingPromocodes() {

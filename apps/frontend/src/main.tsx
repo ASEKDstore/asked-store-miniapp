@@ -1,4 +1,4 @@
-import React from 'react'
+import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { UserProvider } from './context/UserContext'
 import { CartProvider } from './context/CartContext'
@@ -6,13 +6,13 @@ import App from './App'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  <StrictMode>
     <UserProvider>
       <CartProvider>
         <App />
       </CartProvider>
     </UserProvider>
-  </React.StrictMode>,
+  </StrictMode>,
 )
 
 

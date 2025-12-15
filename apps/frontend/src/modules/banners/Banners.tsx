@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSafeNavigate } from '../../hooks/useSafeNavigate'
 import { banners } from '../../data/banners'
 import './banners.css'
