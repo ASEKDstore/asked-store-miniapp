@@ -3,21 +3,42 @@ services:
   - type: web
     name: asked-store-backend
     env: node
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm start
-    rootDir: backend
+    rootDir: apps/backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
     healthCheckPath: /health
+    disk:
+      name: asked-data
+      mountPath: apps/backend/data
 
   # Frontend Static Site
   - type: static_site
     name: asked-store-frontend
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist
+    rootDir: apps/frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
     envVars:
-      - key: VITE_API_URL
+      - key: VITE_API_BASE
+        fromService:
+          type: web
+          name: asked-store-backend
+          property: host
+        format: https://${host}
+
+  # Bot Background Worker
+  - type: worker
+    name: asked-store-bot
+    env: node
+    rootDir: apps/bot
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: BACKEND_URL
         fromService:
           type: web
           name: asked-store-backend
