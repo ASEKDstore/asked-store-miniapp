@@ -1,11 +1,11 @@
 services:
   # Frontend: Vite + React, билд как статический сайт
   - type: web
-    name: asked-store-webapp
+    name: asked-store-frontend
     runtime: static
-    rootDir: webapp
+    rootDir: apps/frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: ./webapp/dist
+    staticPublishPath: ./apps/frontend/dist
     plan: free
     autoDeployTrigger: commit
 
@@ -13,7 +13,7 @@ services:
   - type: web
     name: asked-store-backend
     runtime: node
-    rootDir: backend
+    rootDir: apps/backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     plan: free
@@ -22,5 +22,6 @@ services:
     envVars:
       - key: PORT
         value: 4000
+
 
 
